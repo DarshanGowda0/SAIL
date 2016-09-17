@@ -3,10 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/SAIL.iml" filepath="$PROJECT_DIR$/SAIL.iml" />
-      <module fileurl="file://$PROJECT_DIR$/SAIL.iml" filepath="$PROJECT_DIR$/SAIL.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://$PROJECT_DIR$/sailibrary/sailibrary.iml" filepath="$PROJECT_DIR$/sailibrary/sailibrary.iml" />
       <module fileurl="file://$PROJECT_DIR$/sailibrary/sailibrary.iml" filepath="$PROJECT_DIR$/sailibrary/sailibrary.iml" />
     </modules>
   </component>

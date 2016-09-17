@@ -1,31 +1,35 @@
 package com.dark.sail;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.TextView;
+import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.view.View;
+import android.widget.EditText;
 
 import com.dark.sailibrary.Sailboat;
-import com.dark.sailibrary.ViewObject;
 
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
     Sailboat sailboat;
+    EditText et;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        et = (EditText) findViewById(R.id.et);
+        Log.d("TAG", "onCreate: " + et.getHint().toString());
+        ArrayList<Integer> arrayList = new ArrayList<>();
 
-        ArrayList<ViewObject> arrayList = new ArrayList<>();
-
-        arrayList.add(new ViewObject(Button.class,R.id.button));
-        arrayList.add(new ViewObject(TextView.class,R.id.text));
+        arrayList.add(R.id.button);
+        arrayList.add(R.id.text);
+        arrayList.add(R.id.et);
 
         sailboat = new Sailboat();
-        sailboat.initialize(MainActivity.this,arrayList);
+        sailboat.initialize(MainActivity.this, arrayList);
     }
 
     @Override
@@ -33,5 +37,9 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
 
         sailboat.destroy();
+    }
+
+    public void click(View view) {
+        Log.d("TAG", "onCreate: " + et.getHint().toString());
     }
 }

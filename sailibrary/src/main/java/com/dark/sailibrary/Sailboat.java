@@ -1,8 +1,11 @@
 package com.dark.sailibrary;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
@@ -27,7 +30,7 @@ public class Sailboat implements RecognitionListener {
     FirebaseDatabase database;
     DatabaseReference databaseReference;
     Activity activity;
-    ArrayList<ViewObject> listOfIds;
+    ArrayList<Integer> listOfIds;
     String TAG = "Test";
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
@@ -45,11 +48,15 @@ public class Sailboat implements RecognitionListener {
         speech.destroy();
     }
 
-    public void initialize(Activity activity, ArrayList<ViewObject> listOfIds) {
+    public void initialize(Activity activity, ArrayList<Integer> listOfIds) {
         this.activity = activity;
         this.listOfIds = listOfIds;
 
-        sendInfo();
+        // first time add the hint to thr firebase db
+        if (!PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("init",false)) {
+            PreferenceManager.getDefaultSharedPreferences(activity).edit().putBoolean("init", true).apply();
+            sendInfo();
+        }
         startListener();
 
     }
@@ -75,6 +82,7 @@ public class Sailboat implements RecognitionListener {
 
 
 
+    @TargetApi(Build.VERSION_CODES.M)
     private void sendInfo() {
 
         String packageName = activity.getPackageName().replaceAll("\\.", "_");
@@ -85,34 +93,38 @@ public class Sailboat implements RecognitionListener {
         HashMap<String, HashMap<String, String>> views = new HashMap<>();
 
         for (int i = 0; i < listOfIds.size(); i++) {
-            View v = (activity.findViewById(listOfIds.get(i).id));
+            View v = (activity.findViewById(listOfIds.get(i)));
             String text;
             try {
                 text = ((TextView) v).getHint().toString();
             } catch (Exception e) {
                 text = ((TextView) v).getText().toString();
+                String test = (String) (v).getAccessibilityClassName();
+                Log.d(TAG, "sendInfo: "+test);
                 e.printStackTrace();
             }
 
-            Log.d(TAG, "sendInfo: id " + listOfIds.get(i).id);
+            Log.d(TAG, "sendInfo: id " + listOfIds.get(i));
             Log.d(TAG, "sendInfo: text " + text);
+            String key = databaseReference.child("packages/" + packageName + "/bucket").push().getKey();
             HashMap<String, String> hash = new HashMap<>();
-            hash.put("hint", text);
-            views.put("" + listOfIds.get(i).id, hash);
+            hash.put(key, text);
+            views.put("" + listOfIds.get(i), hash);
         }
 
-        HashMap<String, Object> activityHash = new HashMap<>();
-        activityHash.put("views", views);
-
-        HashMap<String, Object> packageHash = new HashMap<>();
-        packageHash.put(activityName, activityHash);
+        /*
+//        HashMap<String, Object> activityHash = new HashMap<>();
+//        activityHash.put("views", views);
+//
+//        HashMap<String, Object> packageHash = new HashMap<>();
+//        packageHash.put(activityName, activityHash);
 
 //        HashMap<String,Object> rootHash = new HashMap<>();
 //        rootHash.put("activities",packageHash);
 //        packageHash.put("temp","HEllo");
+            */
 
-
-        databaseReference.child("packages/" + packageName + "/activities").setValue(packageHash)
+        databaseReference.child("packages/" + packageName + "/bucket").setValue(views)
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {

@@ -12,6 +12,8 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
+    Sailboat sailboat;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -22,7 +24,14 @@ public class MainActivity extends AppCompatActivity {
         arrayList.add(new ViewObject(Button.class,R.id.button));
         arrayList.add(new ViewObject(TextView.class,R.id.text));
 
-        Sailboat sailboat = new Sailboat();
+        sailboat = new Sailboat();
         sailboat.initialize(MainActivity.this,arrayList);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        sailboat.destroy();
     }
 }

@@ -2,16 +2,28 @@ package com.dark.sailibrary;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.Gravity;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -25,7 +37,7 @@ import java.util.HashMap;
 /**
  * Created by Rohan on 9/17/2016.
  */
-public class Sailboat implements RecognitionListener {
+public class Sailboat  implements RecognitionListener {
 
     FirebaseDatabase database;
     DatabaseReference databaseReference;
@@ -35,30 +47,37 @@ public class Sailboat implements RecognitionListener {
     private SpeechRecognizer speech = null;
     private Intent recognizerIntent;
 
+    //chathead variables
+
 
 
     public Sailboat() {
-
         database = FirebaseDatabase.getInstance();
         databaseReference = database.getReference();
 
     }
 
-    public void destroy(){
-        speech.destroy();
-    }
+
+
+
 
     public void initialize(Activity activity, ArrayList<Integer> listOfIds) {
         this.activity = activity;
         this.listOfIds = listOfIds;
 
+
         // first time add the hint to thr firebase db
-        if (!PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("init",false)) {
+        if (!PreferenceManager.getDefaultSharedPreferences(activity).getBoolean("init", false)) {
             PreferenceManager.getDefaultSharedPreferences(activity).edit().putBoolean("init", true).apply();
             sendInfo();
         }
         startListener();
+        showChatHead();
 
+    }
+
+    private void showChatHead() {
+        activity.startService(new Intent(activity,ChatHeadService.class));
     }
 
     private void startListener() {
@@ -81,7 +100,6 @@ public class Sailboat implements RecognitionListener {
     }
 
 
-
     @TargetApi(Build.VERSION_CODES.M)
     private void sendInfo() {
 
@@ -99,8 +117,9 @@ public class Sailboat implements RecognitionListener {
                 text = ((TextView) v).getHint().toString();
             } catch (Exception e) {
                 text = ((TextView) v).getText().toString();
-                String test = (String) (v).getAccessibilityClassName();
-                Log.d(TAG, "sendInfo: "+test);
+//                v.getClass().getName()
+//                String test = (String) (v).getAccessibilityClassName();
+//                Log.d(TAG, "sendInfo: " + test);
                 e.printStackTrace();
             }
 
@@ -188,16 +207,17 @@ public class Sailboat implements RecognitionListener {
         String text = "";
         for (String result : matches) {
             text += result + "\n";
-            if (result.toLowerCase().startsWith("candy")){
-                Log.d(TAG, "onResults: send this to chandy:"+result.substring(5));
+            if (result.toLowerCase().startsWith("candy")) {
+                Log.d(TAG, "onResults: send this to chandy:" + result.substring(5));
+                ChatHeadService.chatHead.setImageResource(android.R.drawable.ic_media_play);
                 break;
             }
-            if (result.toLowerCase().contains("bye candy")){
+            if (result.toLowerCase().contains("buy candy")) {
                 Log.d(TAG, "onResults: bye candy");
                 speech.stopListening();
             }
         }
-        Log.i(TAG, "onResults:"+text);
+        Log.i(TAG, "onResults:" + text);
 
         startListener();
 
@@ -250,5 +270,15 @@ public class Sailboat implements RecognitionListener {
         }
         return message;
     }
+
+
+    public void destroy() {
+        speech.destroy();
+        activity.stopService(new Intent(activity,ChatHeadService.class));
+
+    }
+
+
+
 
 }

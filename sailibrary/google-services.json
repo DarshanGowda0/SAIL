@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "667167173949",
+    "firebase_url": "https://sail-857f9.firebaseio.com",
+    "project_id": "sail-857f9",
+    "storage_bucket": "sail-857f9.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:667167173949:android:f4efc328018a947b",
+        "android_client_info": {
+          "package_name": "com.dark.sailibrary"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "667167173949-bglelg0rt58je6kgccr1a9b3p47oa4cs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyABqAJgv7PQztXZv935_rS8KDyhw2Qd7uI"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

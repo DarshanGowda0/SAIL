@@ -1,0 +1,131 @@
+from django.shortcuts import render
+import json
+# Create your views here.
+from rest_framework import status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from suggest_faq.models import Tables, messages, Users
+from suggest_faq.serializers import UserSerializer, AddMessageSerializer, getJSON
+from rest_framework.views import APIView
+
+#from suggest_faq.serializers import SnippetSerializer, SuggestionSerializer
+
+
+#add and view users
+class SnippetList(APIView):
+    """
+    List all snippets, or create a new snippet.
+    """
+    # VALIDATING THE USERS
+    def valudate(self,params):
+        snippets = Users.objects.all().filter(user_name=params['user_name'])
+        if snippets[0].password == params['password']:
+            self.owner = snippets[0]
+            return True
+        else:
+            return False
+            
+    # GETS ALL THE MESSAGES OF THE GIVEN MODEL:            
+    def get(self, request, format=None):
+    
+        # FIRST CHECKING IF YOUR AUTHERIZATION IS VALID
+        if(self.valudate(request.query_params)):
+        
+            # Every request contains a json object to obtain additional information
+            
+            data = request.query_params['json']     # load the json and 
+                                                    # parse
+            ser = getJSON(data=json.loads(data))    # Serialize the json
+            if ser.is_valid():
+                user_data = ser.data
+            
+            '''   
+            We then obtain a list of all the tables that have been created
+            by the current user, to check if the data being queried is 
+            created by the same person
+            '''
+            
+            table_object_list = Tables.objects.all().filter(owner=self.owner) 
+            
+            '''
+            We now need to convert this list of object of all the tables
+            to a list of table names
+            '''       
+            
+            table_list = [i.table_name for i in table_object_list]
+            
+            '''
+            Find the required table of exit with a bad request
+            '''
+            
+            if user_data['table_name'] in table_list:
+                self.table = table_object_list[table_list.index(user_data['table_name'])]
+            else:
+                return Response('invalid table name',status=status.HTTP_400_BAD_REQUEST)    
+            
+            '''
+            Now that we have all the parameters that we need,
+            we can go ahead and print the data in the required table
+            '''
+       
+            snippets = messages.objects.all().filter(table=self.table)
+            serializer = AddMessageSerializer(snippets, many=True, data=request.data)
+            
+            if serializer.is_valid():
+	            return Response(serializer.data)
+
+        else:
+            return Response('authentication failed',status=status.HTTP_400_BAD_REQUEST)
+            
+
+
+    # INSERT THE MESSAGE INTO THE SPECIFIED MODEL:
+        
+    def post(self, request, format=None):
+        if(self.valudate(request.query_params)):        
+            serializer = AddMessageSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.more(self.owner)
+#                serializer.save()       
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        else:
+            return Response('authentication failed',status=status.HTTP_400_BAD_REQUEST)
+
+    # DELETES ALL MESSAGES IN THE CURRENT MODEL
+    
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class SnippetDetail(APIView):
+    """
+    Retrieve, update or delete a snippet instance.
+    """
+    def get_object(self, pk):
+        try:
+            return Snippet.objects.get(pk=pk)
+        except Snippet.DoesNotExist:
+            raise Http404
+
+    def get(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet)
+        return Response(serializer.data)
+
+    def put(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        serializer = SnippetSerializer(snippet, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk, format=None):
+        snippet = self.get_object(pk)
+        snippet.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -241,7 +241,7 @@ public class Sailboat implements RecognitionListener {
 //                        mTextView.setText("Response is: "+ response.substring(0,500));
                             Log.d(TAG, "onResponse: " + response);
                             parseResponse(response,speech);
-                            ChatHeadService.chatHead.setImageResource(R.drawable.microphone_standby);
+                            ChatHeadService.chatHead.setImageResource(R.drawable.microphone_standby );
                         }
                     }, new Response.ErrorListener() {
                 @Override

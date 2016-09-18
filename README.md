@@ -11,3 +11,8 @@ SAIL (Speech Assisted Interface Library) is a library (duh!) that will make your
 * Create an object of Sailboat and call the initialize function, where you can specify the different actions and views on the current activity. ```` Sailboat sailboat = new Sailboat();  
 sailboat.initialize(Context, ArrayList); ````
 * Were you expecting a third step? There isn't ;)
+
+---
+
+### Video Teaser
+[![SAIL](http://img.youtube.com/vi/3FvlFYpyp3M/0.jpg)](https://youtu.be/3FvlFYpyp3M)

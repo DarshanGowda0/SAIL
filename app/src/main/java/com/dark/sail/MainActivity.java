@@ -1,5 +1,6 @@
 package com.dark.sail;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
@@ -46,14 +47,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onStop() {
+        super.onStop();
 
         sailboat.destroy();
     }
 
     public void click(View view) {
         Log.d("TAG", "onCreate: " + et.getHint().toString());
+        startActivity(new Intent(MainActivity.this,Main2Activity.class));
         Toast.makeText(MainActivity.this, "Button clicked", Toast.LENGTH_SHORT).show();
     }
 }

@@ -26,7 +26,7 @@ public class ChatHeadService extends Service {
         windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
 
         chatHead = new ImageView(this);
-        chatHead.setImageResource(android.R.drawable.stat_notify_voicemail);
+        chatHead.setImageResource(R.drawable.microphone_standby);
 
         params = new WindowManager.LayoutParams(
                 WindowManager.LayoutParams.WRAP_CONTENT,
@@ -38,6 +38,7 @@ public class ChatHeadService extends Service {
         params.gravity = Gravity.TOP | Gravity.LEFT;
         params.x = 0;
         params.y = 100;
+
 
         //this code is for dragging the chat head
         chatHead.setOnTouchListener(new View.OnTouchListener() {

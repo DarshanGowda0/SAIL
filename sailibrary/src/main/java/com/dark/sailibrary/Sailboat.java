@@ -121,10 +121,25 @@ public class Sailboat implements RecognitionListener {
 
             Log.d(TAG, "sendInfo: id " + listOfIds.get(i));
             Log.d(TAG, "sendInfo: text " + text);
-            String key = databaseReference.child("packages/" + packageName + "/bucket").push().getKey();
-            HashMap<String, String> hash = new HashMap<>();
-            hash.put(key, text);
-            views.put("" + listOfIds.get(i), hash);
+            String key = databaseReference.child("packages/" + packageName + "/bucket/"+listOfIds.get(i)).push().getKey();
+
+//            HashMap<String, String> hash = new HashMap<>();
+//            hash.put(key, text);
+//            views.put("" + listOfIds.get(i), hash);
+
+            databaseReference.child("packages/" + packageName + "/bucket/"+listOfIds.get(i)+"/"+key).setValue(text)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Log.d("TAG", "onSuccess: ");
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("TAG", "onFailure: " + e);
+                }
+            });
         }
 
         /*
@@ -139,19 +154,7 @@ public class Sailboat implements RecognitionListener {
 //        packageHash.put("temp","HEllo");
             */
 
-        databaseReference.child("packages/" + packageName + "/bucket").setValue(views)
-                .addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Log.d("TAG", "onSuccess: ");
 
-                    }
-                }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("TAG", "onFailure: " + e);
-            }
-        });
 
     }
 
@@ -205,11 +208,12 @@ public class Sailboat implements RecognitionListener {
             text += result + "\n";
             if (result.toLowerCase().startsWith("candy")) {
                 Log.d(TAG, "onResults: send this to chandy:" + result.substring(5));
-                ChatHeadService.chatHead.setImageResource(android.R.drawable.ic_media_play);
+                ChatHeadService.chatHead.setImageResource(R.drawable.microphone_listening);
                 sendData(result.substring(5));
                 break;
             }
-            if (result.toLowerCase().contains("buy candy")) {
+            if (result.toLowerCase().contains("goodbye candy")) {
+                ChatHeadService.chatHead.setImageResource(R.drawable.microphone_standby);
                 Log.d(TAG, "onResults: bye candy");
                 speech.stopListening();
                 speech.destroy();
@@ -222,7 +226,7 @@ public class Sailboat implements RecognitionListener {
 
     }
 
-    private void sendData(String speech) {
+    private void sendData(final String speech) {
         // Instantiate the RequestQueue.
         RequestQueue queue = Volley.newRequestQueue(activity);
         try {
@@ -236,7 +240,8 @@ public class Sailboat implements RecognitionListener {
                             // Display the first 500 characters of the response string.
 //                        mTextView.setText("Response is: "+ response.substring(0,500));
                             Log.d(TAG, "onResponse: " + response);
-                            parseResponse(response);
+                            parseResponse(response,speech);
+                            ChatHeadService.chatHead.setImageResource(R.drawable.microphone_standby);
                         }
                     }, new Response.ErrorListener() {
                 @Override
@@ -253,7 +258,7 @@ public class Sailboat implements RecognitionListener {
 
     }
 
-    private void parseResponse(String response) {
+    private void parseResponse(String response, String speech) {
         Integer id = 0;
         String splitString = "";
 
@@ -276,7 +281,26 @@ public class Sailboat implements RecognitionListener {
                 ((EditText) view).setText(splitString);
             }
 
+            trainTheApp(speech,id+"");
+
         }
+    }
+
+    private void trainTheApp(String speech,String id) {
+        String key = databaseReference.child("packages/" + activity.getPackageName().replaceAll("\\.","_") + "/bucket/"+id).push().getKey();
+        databaseReference.child("packages/" + activity.getPackageName().replaceAll("\\.","_") + "/bucket/"+id+"/"+key).setValue(speech)
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        Log.d("TAG", "onSuccess: ");
+
+                    }
+                }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.d("TAG", "onFailure: " + e);
+            }
+        });
     }
 
     @Override

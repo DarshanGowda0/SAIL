@@ -7,5 +7,7 @@ SAIL (Speech Assisted Interface Library) is a library (duh!) that will make your
 
 #### This is how easy we've made it... all you need to incorporate our library is:
 * Add the dependencies
-* Implement the SailboatInterface and override the initializing function, where you can specify the different actions and views on the current activity.
+```` compile ‘com.dark.sail:1.0.0’ ````
+* Create an object of Sailboat and call the initialize function, where you can specify the different actions and views on the current activity. ```` Sailboat sailboat = new Sailboat();  
+sailboat.initialize(Context, ArrayList); ````
 * Were you expecting a third step? There isn't ;)

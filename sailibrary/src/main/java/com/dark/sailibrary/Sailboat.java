@@ -2,42 +2,42 @@ package com.dark.sailibrary;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.graphics.PixelFormat;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.Settings;
 import android.speech.RecognitionListener;
 import android.speech.RecognizerIntent;
 import android.speech.SpeechRecognizer;
 import android.support.annotation.NonNull;
-import android.util.AttributeSet;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.Gravity;
-import android.view.MotionEvent;
 import android.view.View;
-import android.view.WindowManager;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by Rohan on 9/17/2016.
  */
-public class Sailboat  implements RecognitionListener {
+public class Sailboat implements RecognitionListener {
 
     FirebaseDatabase database;
     DatabaseReference databaseReference;
@@ -50,15 +50,11 @@ public class Sailboat  implements RecognitionListener {
     //chathead variables
 
 
-
     public Sailboat() {
         database = FirebaseDatabase.getInstance();
         databaseReference = database.getReference();
 
     }
-
-
-
 
 
     public void initialize(Activity activity, ArrayList<Integer> listOfIds) {
@@ -77,7 +73,7 @@ public class Sailboat  implements RecognitionListener {
     }
 
     private void showChatHead() {
-        activity.startService(new Intent(activity,ChatHeadService.class));
+        activity.startService(new Intent(activity, ChatHeadService.class));
     }
 
     private void startListener() {
@@ -210,11 +206,13 @@ public class Sailboat  implements RecognitionListener {
             if (result.toLowerCase().startsWith("candy")) {
                 Log.d(TAG, "onResults: send this to chandy:" + result.substring(5));
                 ChatHeadService.chatHead.setImageResource(android.R.drawable.ic_media_play);
+                sendData(result.substring(5));
                 break;
             }
             if (result.toLowerCase().contains("buy candy")) {
                 Log.d(TAG, "onResults: bye candy");
                 speech.stopListening();
+                speech.destroy();
             }
         }
         Log.i(TAG, "onResults:" + text);
@@ -222,6 +220,63 @@ public class Sailboat  implements RecognitionListener {
         startListener();
 
 
+    }
+
+    private void sendData(String speech) {
+        // Instantiate the RequestQueue.
+        RequestQueue queue = Volley.newRequestQueue(activity);
+        try {
+            String query = URLEncoder.encode("\"package\":\"" + activity.getPackageName().replaceAll("\\.", "_") + "\",\"view\":\"univ\",\"message\":\"" + speech + "\"", "utf-8");
+            String url = "http://204.152.203.111:8000/predictThisLevel/?format=json&json={" + query + "}";
+// Request a string response from the provided URL.
+            StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                    new Response.Listener<String>() {
+                        @Override
+                        public void onResponse(String response) {
+                            // Display the first 500 characters of the response string.
+//                        mTextView.setText("Response is: "+ response.substring(0,500));
+                            Log.d(TAG, "onResponse: " + response);
+                            parseResponse(response);
+                        }
+                    }, new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError error) {
+                }
+            });
+
+// Add the request to the RequestQueue.
+            queue.add(stringRequest);
+
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void parseResponse(String response) {
+        Integer id = 0;
+        String splitString = "";
+
+        try {
+            JSONObject json = new JSONObject(response);
+            Double confidence = Double.parseDouble(json.getString("accurecy"));
+            id = Integer.parseInt(json.getString("shortcode"));
+            splitString = json.getString("split_string");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        if (listOfIds.contains(id)) {
+            View view = activity.findViewById(id);
+            Log.d(TAG, "parseResponse: " + view.getClass().getName());
+            if (view.hasOnClickListeners()) {
+                view.callOnClick();
+            } else {
+                ((EditText) view).setText(splitString);
+            }
+
+        }
     }
 
     @Override
@@ -274,11 +329,9 @@ public class Sailboat  implements RecognitionListener {
 
     public void destroy() {
         speech.destroy();
-        activity.stopService(new Intent(activity,ChatHeadService.class));
+        activity.stopService(new Intent(activity, ChatHeadService.class));
 
     }
-
-
 
 
 }

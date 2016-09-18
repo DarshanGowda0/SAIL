@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.graphics.PixelFormat;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
-import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
@@ -71,7 +70,6 @@ public class ChatHeadService extends Service {
                 return false;
             }
         });
-
 
 
         windowManager.addView(chatHead, params);

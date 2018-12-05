@@ -13,6 +13,7 @@ sailboat.initialize(Context, ArrayList); ````
 * Were you expecting a third step? There isn't ;)
 
 ---
+### Medium - [Experience](https://medium.com/amruth-pillai/set-sail-at-banyan-hack-16-3d0528369050)
 
 ### Video Teaser
 [![SAIL](http://img.youtube.com/vi/3FvlFYpyp3M/0.jpg)](https://youtu.be/3FvlFYpyp3M)
